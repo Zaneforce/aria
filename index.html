@@ -252,7 +252,7 @@
             <div class="relative">
                 <button class="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 rounded-full pl-3 pr-4 py-1 transition">
                     <div class="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></div>
-                    <span class="text-white font-medium">Justin</span>
+                    <span class="text-white font-medium username">Guest</span>
                 </button>
             </div>
         </div>
@@ -574,6 +574,27 @@
     </footer>
 
     <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('access_token');
+            if (token) {
+                localStorage.setItem('access_token', token);
+                fetchUserProfile(token);
+            }
+        });
+
+        function fetchUserProfile(token) {
+            fetch('https://api.spotify.com/v1/me', {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(profile => {
+                document.querySelector('.username').textContent = profile.display_name;
+                console.log('Logged in as:', profile.display_name);
+            })
+            .catch(err => console.error('Profile fetch error:', err));
+        }
+
         // Fungsi untuk simulasi audio wave
         function animateWave() {
             const waveBars = document.querySelectorAll('.wave-bar');
