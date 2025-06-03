@@ -34,6 +34,11 @@ app.get('/callback', async (req, res) => {
     const { access_token } = tokenResponse.data;
     res.redirect(`/home.html?access_token=${access_token}`);
   } catch (err) {
+    console.error('Error details:', {
+      message: err.message,
+      response: err.response?.data,
+      config: err.config
+    });
     console.error('Error fetching token:', err.response?.data || err.message);
     res.status(500).send('Authentication failed');
   }
