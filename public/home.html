@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aria - Home</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col items-center justify-start p-10">
+
+  <h1 class="text-3xl font-bold mb-6">🎵 Selamat Datang di Aria</h1>
+  <p class="text-gray-400 mb-6">Berikut adalah playlist Spotify Anda:</p>
+
+  <div id="user-info" class="mb-6"></div>
+  <div id="playlists" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('access_token');
+      if (!token) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      localStorage.setItem('access_token', token);
+      fetchUserProfile(token);
+      fetchUserPlaylists(token);
+    });
+
+    function fetchUserProfile(token) {
+      fetch('https://api.spotify.com/v1/me', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(profile => {
+        const userInfo = document.getElementById('user-info');
+        userInfo.innerHTML = `<h2 class="text-xl font-semibold mb-2">👤 ${profile.display_name}</h2>`;
+      })
+      .catch(err => console.error('Profile fetch error:', err));
+    }
+
+    function fetchUserPlaylists(token) {
+      fetch('https://api.spotify.com/v1/me/playlists', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        const playlists = document.getElementById('playlists');
+        data.items.forEach(playlist => {
+          const card = document.createElement('div');
+          card.className = 'bg-gray-800 rounded-lg p-4';
+          card.innerHTML = `
+            <img src="${playlist.images[0]?.url}" alt="${playlist.name}" class="w-full h-48 object-cover rounded-lg mb-4">
+            <h3 class="text-lg font-bold mb-2">${playlist.name}</h3>
+            <p class="text-gray-400 text-sm">${playlist.tracks.total} lagu</p>
+          `;
+          playlists.appendChild(card);
+        });
+      })
+      .catch(err => console.error('Playlists fetch error:', err));
+    }
+  </script>
+
+</body>
+</html>
